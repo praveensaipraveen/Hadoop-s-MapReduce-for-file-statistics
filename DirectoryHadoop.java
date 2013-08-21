@@ -1,108 +1,49 @@
-package org.apache.hadoop.mapreduce.lib.output;
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package directoryhadoop;
 
-import java.io.IOException;
-import java.text.NumberFormat;
+/**
+ *
+ * @author user
+ */
+
+import java.nio.file.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.mapred.FileAlreadyExistsException;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.OutputCommitter;
-import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.RecordWriter;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.TaskInputOutputContext;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-public abstract class FileOutputFormat<K extends Object, V extends Object> extends OutputFormat<K, V> {
 
-    public enum Counter {
+public class DirectoryHadoop {
 
-        BYTES_WRITTEN;
-
-        private Counter() {
-            //compiled code
-            throw new RuntimeException("Compiled Code");
+    /**
+     * @param args the command line arguments
+     */
+       
+    public static void main(String[] args) throws Exception{
+        if(args.length!=2){
+            System.err.println("usage: DirectoryHadoop.jar <input path> <output path>");
+            System.exit(-1);
         }
-    }
-    protected static final String BASE_OUTPUT_NAME = "mapreduce.output.basename";
-    protected static final String PART = "part";
-    private static final NumberFormat NUMBER_FORMAT;
-    private FileOutputCommitter committer;
-
-    public FileOutputFormat() {
-        //compiled code
-        throw new RuntimeException("Compiled Code");
-    }
-
-    public static void setCompressOutput(Job job, boolean compress) {
-        //compiled code
-        throw new RuntimeException("Compiled Code");
-    }
-
-    public static boolean getCompressOutput(JobContext job) {
-        //compiled code
-        throw new RuntimeException("Compiled Code");
-    }
-
-    public static void setOutputCompressorClass(Job job, Class<? extends CompressionCodec> codecClass) {
-        //compiled code
-        throw new RuntimeException("Compiled Code");
-    }
-
-    public static Class<? extends CompressionCodec> getOutputCompressorClass(JobContext job, Class<? extends CompressionCodec> defaultValue) {
-        //compiled code
-        throw new RuntimeException("Compiled Code");
-    }
-
-    public abstract RecordWriter<K, V> getRecordWriter(TaskAttemptContext tac) throws IOException, InterruptedException;
-
-    public void checkOutputSpecs(JobContext jc) throws FileAlreadyExistsException, IOException {
-        //compiled code
-        throw new RuntimeException("Compiled Code");
-    }
-
-    public static void setOutputPath(Job job, Path path) {
-        //compiled code
-        throw new RuntimeException("Compiled Code");
-    }
-
-    public static Path getOutputPath(JobContext jc) {
-        //compiled code
-        throw new RuntimeException("Compiled Code");
-    }
-
-    public static Path getWorkOutputPath(TaskInputOutputContext<?, ?, ?, ?> tioc) throws IOException, InterruptedException {
-        //compiled code
-        throw new RuntimeException("Compiled Code");
-    }
-
-    public static Path getPathForWorkFile(TaskInputOutputContext<?, ?, ?, ?> tioc, String string, String string1) throws IOException, InterruptedException {
-        //compiled code
-        throw new RuntimeException("Compiled Code");
-    }
-
-    public static synchronized String getUniqueFile(TaskAttemptContext tac, String string, String string1) {
-        //compiled code
-        throw new RuntimeException("Compiled Code");
-    }
-
-    public Path getDefaultWorkFile(TaskAttemptContext tac, String string) throws IOException {
-        //compiled code
-        throw new RuntimeException("Compiled Code");
-    }
-
-    protected static String getOutputName(JobContext jc) {
-        //compiled code
-        throw new RuntimeException("Compiled Code");
-    }
-
-    protected static void setOutputName(JobContext jc, String string) {
-        //compiled code
-        throw new RuntimeException("Compiled Code");
-    }
-
-    public synchronized OutputCommitter getOutputCommitter(TaskAttemptContext tac) throws IOException {
-        //compiled code
-        throw new RuntimeException("Compiled Code");
+        
+        Job job=new Job();
+        job.setJarByClass(DirectoryHadoop.class);
+        job.setJobName("Directory file count");
+        
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        
+        job.setMapperClass(DirectoryMapper.class);
+        job.setCombinerClass(DirectoryReducer.class);
+        job.setReducerClass(DirectoryReducer.class);
+        
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+        
+        System.exit(job.waitForCompletion(true)?0:1);
     }
 }
